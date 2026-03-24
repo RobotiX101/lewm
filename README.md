@@ -16,7 +16,7 @@
   <img src="assets/lewm.gif" width="80%">
 </p>
 
-If you find this code useful, please reference in your paper:
+If you find this code useful, please reference it in your paper:
 ```
 @article{maes_lelidec2026lewm,
   title={LeWorldModel: Stable End-to-End Joint-Embedding Predictive Architecture from Pixels},
@@ -117,7 +117,7 @@ import stable_worldmodel as swm
 cost = swm.policy.AutoCostModel('pusht/lewm')
 ```
 
-Both functions accept:
+This function accepts:
 - `run_name` — checkpoint path **relative to `$STABLEWM_HOME`**, without the `_object.ckpt` suffix
 - `cache_dir` — optional override for the checkpoint root (defaults to `$STABLEWM_HOME`)
 
