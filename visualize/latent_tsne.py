@@ -77,7 +77,7 @@ def extract_embeddings(model, dataset, max_samples, device):
         if "state" in sample:
             all_states.append(sample["state"][-1].numpy())
     return (np.concatenate(all_embs, axis=0),
-            np.concatenate(all_states, axis=0) if all_states else None)
+            np.stack(all_states, axis=0) if all_states else None)
 
 
 def main():
