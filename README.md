@@ -69,3 +69,34 @@ $DATASET_ROOT/<dataset_name>/
 ```
 
 Supported features: `observation.state`, `action`, and multiple `observation.images.*` cameras.
+
+## Visualization
+
+Scripts under `visualize/` reproduce key analyses from the paper. Each reads checkpoints from `$STABLEWM_HOME` (default `~/.stable_worldmodel/`).
+
+**Latent Space t-SNE** (Figure 9) — 2D projection of embeddings colored by state, comparing checkpoints:
+```bash
+python visualize/latent_tsne.py \
+    --checkpoints ~/.stable_worldmodel/<run>/lewm_epoch_1_object.ckpt \
+                   ~/.stable_worldmodel/<run>/lewm_epoch_100_object.ckpt \
+    --dataset_name top_short_merged \
+    --output latent_tsne.png
+```
+
+**Temporal Straightening** (Figure 17) — cosine similarity of consecutive velocity vectors over training:
+```bash
+python visualize/temporal_straightening.py \
+    --checkpoints ~/.stable_worldmodel/<run>/lewm_epoch_1_object.ckpt \
+                   ~/.stable_worldmodel/<run>/lewm_epoch_50_object.ckpt \
+                   ~/.stable_worldmodel/<run>/lewm_epoch_100_object.ckpt \
+    --output temporal_straightening.png
+```
+
+**Violation-of-Expectation** (Figure 10) — surprise under unperturbed / visual / physical perturbation:
+```bash
+python visualize/voe_surprise.py \
+    --checkpoint ~/.stable_worldmodel/<run>/lewm_epoch_100_object.ckpt \
+    --dataset_name top_short_merged \
+    --n_trajectories 50 \
+    --output voe_surprise.png
+```
