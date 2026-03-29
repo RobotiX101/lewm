@@ -8,6 +8,7 @@ import stable_pretraining as spt
 import stable_worldmodel as swm
 import torch
 from lightning.pytorch.loggers import WandbLogger
+from swanlab.integration.pytorch_lightning import SwanLabLogger
 from omegaconf import OmegaConf, open_dict
 
 from jepa import JEPA
@@ -51,7 +52,16 @@ def run(cfg):
     ##       dataset       ##
     #########################
 
-    dataset = swm.data.HDF5Dataset(**cfg.data.dataset, transform=None)
+    # Factory: support custom dataset classes via _target_ in config
+    from omegaconf import OmegaConf
+    _cfg_dict = OmegaConf.to_container(cfg.data.dataset, resolve=True)
+    if "_target_" in _cfg_dict:
+        import importlib
+        _mod, _cls = _cfg_dict["_target_"].rsplit(".", 1)
+        dataset_cls = getattr(importlib.import_module(_mod), _cls)
+        dataset = dataset_cls(**{k: v for k, v in _cfg_dict.items() if k != "_target_"}, transform=None)
+    else:
+        dataset = swm.data.HDF5Dataset(**cfg.data.dataset, transform=None)
     transforms = [get_img_preprocessor(source='pixels', target='pixels', img_size=cfg.img_size)]
     
     with open_dict(cfg):
@@ -151,6 +161,13 @@ def run(cfg):
     if cfg.wandb.enabled:
         logger = WandbLogger(**cfg.wandb.config)
         logger.log_hyperparams(OmegaConf.to_container(cfg))
+    elif cfg.get("swanlab", {}).get("enabled", False):
+        import swanlab
+        swanlab.login(api_key=cfg.swanlab.api_key)
+        logger = SwanLabLogger(
+            project=cfg.swanlab.project,
+            experiment_name=cfg.swanlab.get("name", cfg.output_model_name),
+        )
 
     run_dir.mkdir(parents=True, exist_ok=True)
     with open(run_dir / "config.yaml", "w") as f:

@@ -1,0 +1,18 @@
+dataset:
+  _target_: lerobot_dataset.LeRobotDatasetWrapper
+  root: /home/byron/Survey/Datasets/top_short_merged
+  num_steps: ${eval:'${wm.num_preds} + ${wm.history_size}'}
+  frameskip: 5
+  keys_to_load:
+    - pixels
+    - action
+    - state
+  keys_to_cache:
+    - action
+    - state
+  camera_keys:
+    - observation.images.top_rgb
+    - observation.images.left_rgb
+    - observation.images.right_rgb
+  key_map:
+    state: observation.state
