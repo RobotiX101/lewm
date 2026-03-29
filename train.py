@@ -162,8 +162,10 @@ def run(cfg):
         logger = WandbLogger(**cfg.wandb.config)
         logger.log_hyperparams(OmegaConf.to_container(cfg))
     elif cfg.get("swanlab", {}).get("enabled", False):
-        import swanlab
-        swanlab.login(api_key=cfg.swanlab.api_key)
+        import swanlab, os
+        api_key = os.environ.get("SWANLAB_API_KEY")
+        if api_key:
+            swanlab.login(api_key=api_key)
         logger = SwanLabLogger(
             project=cfg.swanlab.project,
             experiment_name=cfg.swanlab.get("name", cfg.output_model_name),

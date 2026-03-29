@@ -44,7 +44,6 @@ wandb:
 
 swanlab:
   enabled: True
-  api_key: feEHAWREioM5s9FS79RDj
   project: lewm
   name: ${output_model_name}
 
