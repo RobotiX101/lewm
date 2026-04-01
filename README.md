@@ -100,3 +100,61 @@ python visualize/voe_surprise.py \
     --n_trajectories 50 \
     --output voe_surprise.png
 ```
+
+**Latent Decoder** (Appendix D) — train a cross-attention decoder to reconstruct images from CLS embeddings, then visualize rollout predictions:
+```bash
+# Train decoder (requires ~20GB RAM for embedding cache)
+python visualize/latent_decoder.py train \
+    --checkpoint ~/.stable_worldmodel/lewm_epoch_100_object.ckpt \
+    --dataset_name top_short_merged \
+    --output_dir visualize/decoder_checkpoints
+
+# Visualize decoded rollout (all cameras concatenated)
+python visualize/latent_decoder.py visualize \
+    --checkpoint ~/.stable_worldmodel/lewm_epoch_100_object.ckpt \
+    --decoder_path visualize/decoder_checkpoints/best_decoder.pt \
+    --dataset_name top_short_merged \
+    --output visualize/rollout_decoded.png
+
+# Per-camera breakdown
+python visualize/latent_decoder.py visualize \
+    --checkpoint ~/.stable_worldmodel/lewm_epoch_100_object.ckpt \
+    --decoder_path visualize/decoder_checkpoints/best_decoder.pt \
+    --dataset_name top_short_merged \
+    --per_camera \
+    --output visualize/rollout_decoded_cameras.png
+```
+
+## Evaluation
+
+`eval_lerobot.py` evaluates a trained model on LeRobot datasets in two modes:
+
+### Prediction Quality (`--mode predict`)
+
+Replicates the training forward pass on held-out data and measures how accurately the model predicts future embeddings:
+
+```bash
+python eval_lerobot.py --mode predict --num_eval 50
+```
+
+Reports MSE and cosine similarity between predicted and actual future embeddings. A good model should achieve cosine similarity > 0.99.
+
+### CEM Planning (`--mode cem`)
+
+Uses Cross-Entropy Method (CEM) to find action sequences whose predicted future embeddings match actual encoded future frames. Measures whether the learned dynamics are controllable:
+
+```bash
+python eval_lerobot.py --mode cem --num_eval 10 --num_samples 200 --cem_iterations 20
+```
+
+Reports costs for four methods:
+- **Zero-action**: predict with zero actions (baseline)
+- **Oracle**: predict with ground-truth actions from the dataset
+- **CEM (warm)**: CEM initialized from ground-truth actions
+- **CEM (zero)**: CEM initialized from scratch
+
+Lower cost = predicted embeddings closer to actual future frame embeddings. Key parameters:
+- `--horizon` — planning horizon in model steps (default 5)
+- `--goal_offset` — distance between start and goal frames (auto-computed from horizon)
+- `--num_samples` — CEM population size (default 200)
+- `--cem_iterations` — CEM optimization steps (default 20)
