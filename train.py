@@ -59,7 +59,7 @@ def run(cfg):
         import importlib
         _mod, _cls = _cfg_dict["_target_"].rsplit(".", 1)
         dataset_cls = getattr(importlib.import_module(_mod), _cls)
-        dataset = dataset_cls(**{k: v for k, v in _cfg_dict.items() if k != "_target_"}, transform=None)
+        dataset = dataset_cls(**{k: v for k, v in _cfg_dict.items() if k not in ("_target_", "dataset_name")}, transform=None)
     else:
         dataset = swm.data.HDF5Dataset(**cfg.data.dataset, transform=None)
     transforms = [get_img_preprocessor(source='pixels', target='pixels', img_size=cfg.img_size)]

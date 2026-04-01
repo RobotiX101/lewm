@@ -1,7 +1,7 @@
 dataset:
   _target_: lerobot_dataset.LeRobotDatasetWrapper
   dataset_name: top_short_merged
-  root: ${oc.env:DATASET_ROOT}/${dataset_name}
+  root: ${oc.env:DATASET_ROOT}/${.dataset_name}
   num_steps: ${eval:'${wm.num_preds} + ${wm.history_size}'}
   frameskip: 5
   keys_to_load:
